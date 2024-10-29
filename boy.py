@@ -13,7 +13,6 @@ class Idle:
             boy.action = 3
             boy.face_dir = 1
 
-
         boy.frame = 0
         boy.dir = 0
 
@@ -77,10 +76,49 @@ class Run:
     def do(boy):
         boy.frame = (boy.frame + 1) % 8
         boy.x += boy.dir * 5
+        if boy.x < 10:
+            boy.x = 10
+        elif boy.x > 790:
+            boy.x = 790
         pass
     @staticmethod
     def draw(boy):
         boy.image.clip_draw(boy.frame * 100, boy.action * 100, 100, 100, boy.x, boy.y)
+
+class AutoRun:
+    @staticmethod
+    def enter(boy, e):
+        boy.dir = boy.face_dir
+        if boy.face_dir == 1:
+            boy.action = 1
+        elif boy.face_dir == -1:
+            boy.action = 0
+
+        boy.start_time = get_time()
+    @staticmethod
+    def exit(boy, e):
+        pass
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + 1) % 8
+        boy.x += boy.dir * 5
+        if boy.x < 10:
+            boy.x = 10
+            boy.dir = 1
+        elif boy.x > 790:
+            boy.x = 790
+            boy.dir = -1
+
+        if get_time() - boy.start_time > 2:
+            boy.state_machine.add_event(('TIME_OUT', 0))
+        pass
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_composite_draw(
+            boy.frame * 100, boy.action * 100, 100, 100,
+            0, '',
+            boy.x, boy.y, 200, 200
+        )
 
 
 
