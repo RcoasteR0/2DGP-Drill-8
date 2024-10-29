@@ -56,8 +56,8 @@ class Sleep:
             )
         elif boy.face_dir == -1:
             boy.image.clip_composite_draw(
-                boy.frame * 100, 300, 100, 100,
-                3.141592 / 2,  # 회전 각도
+                boy.frame * 100, 200, 100, 100,
+                -3.141592 / 2,  # 회전 각도
                 '',  # 좌우상하 반전 X
                 boy.x + 25, boy.y - 25, 100, 100
             )
