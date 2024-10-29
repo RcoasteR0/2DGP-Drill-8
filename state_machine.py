@@ -1,4 +1,4 @@
-from sdl2 import SDLK_SPACE
+from sdl2 import SDLK_SPACE, SDL_KEYDOWN, SDL_KEYUP, SDLK_RIGHT, SDLK_LEFT
 
 
 def space_down(e):
@@ -7,7 +7,20 @@ def space_down(e):
 def time_out(e):
     return e[0] == 'TIME_OUT'
 
+def start_event(e):
+    return e[0] == 'START'
 
+def right_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_RIGHT
+
+def right_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_RIGHT
+
+def left_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_LEFT
+
+def left_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LEFT
 
 # 상태 머신을 관리해주는 클래스
 class StateMachine:
@@ -21,15 +34,14 @@ class StateMachine:
         # 이벤트 발생했는지 확인하고, 거기에 따라서 상태변화를 수행
         if self.event_que:  # list 에 요소가 있으면, list 값은 True
             e = self.event_que.pop(0)
-            for check_event, next_state in self.transitions[self.cur_state].items():
-                if check_event(e): # e가 지금 check_event 이면? space_down(e) ?
-                    self.cur_state.exit(self.o)
-                    self.cur_state = next_state
-                    self.cur_state.enter(self.o)
+            self.handle_event(e)
 
     def start(self, start_state):
         # 현재 상태를 시작 상태로 만듬
         self.cur_state = start_state # Idle
+        # 새로운 상태로 시작됐기 때문에, enter를 실행해야 한다.
+        self.cur_state.enter(self.o, ('START', 0))
+        print(f'ENTER into {self.cur_state}')
         pass
 
     def draw(self):
@@ -40,12 +52,18 @@ class StateMachine:
         self.transitions = transitions
         pass
 
-    def handle_event(self, event):
-        #event : input event
-        #state machine event : (이벤트종류, 값)
-        self.state_machine.add_event(
-            'INPUT', event
-        )
-
     def add_event(self, e):
         self.event_que.append(e)
+        print(f'    DEBUG: new event {e} is added')
+
+    def handle_event(self, event):
+        for check_event, next_state in self.transitions[self.cur_state].items():
+            if check_event(event):
+                self.cur_state.exit(self.o, event)
+                print(f'EXIT from {self.cur_state}')
+                self.cur_state = next_state
+                self.cur_state.enter(self.o, event)
+                print(f'ENTER into {next_state}')
+        return
+
+
